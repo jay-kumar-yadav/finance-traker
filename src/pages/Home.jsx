@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import TransactionList from '../components/TransactionList'
 import TransactionChart from '../components/TransactionChart'
-import axios from 'axios'
-import api from '../services/api' 
-
+import api from '../services/api'
 
 const Home = () => {
   const [transactions, setTransactions] = useState([])
@@ -23,7 +21,8 @@ const Home = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      await Promise.all([fetchTransactions(), fetchStats()])
+      // First fetch transactions, then calculate stats from them
+      await fetchTransactions()
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -33,36 +32,76 @@ const Home = () => {
 
   const fetchTransactions = async () => {
     try {
-      const response = await api.get('/transactions')  // Change to api.get
-      // Make sure we have an array, even if empty
-      setTransactions(Array.isArray(response.data) ? response.data : [])
+      const response = await api.get('/transactions')
+      
+      // Handle different response formats
+      let transactionsData = [];
+      
+      if (Array.isArray(response.data)) {
+        transactionsData = response.data;
+      } else if (response.data.data && Array.isArray(response.data.data.transactions)) {
+        transactionsData = response.data.data.transactions;
+      } else if (response.data.transactions && Array.isArray(response.data.transactions)) {
+        transactionsData = response.data.transactions;
+      }
+      
+      console.log('Fetched transactions:', transactionsData);
+      setTransactions(transactionsData);
+      
+      // Calculate stats from the transactions
+      calculateStats(transactionsData);
     } catch (error) {
       console.error('Error fetching transactions:', error)
-      setTransactions([]) // Set to empty array on error
+      setTransactions([])
+      setStats({ income: 0, expense: 0, balance: 0 })
     }
+  }
+
+  const calculateStats = (transactions) => {
+    const income = transactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+      
+    const expense = transactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+      
+    const balance = income - expense;
+    
+    console.log('Calculated stats:', { income, expense, balance });
+    setStats({ income, expense, balance });
   }
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/transactions/stats')  // Change to api.get
-      // The response.data is now an object, not an array
-      setStats({
-        income: response.data.income || 0,
-        expense: response.data.expense || 0,
-        balance: response.data.balance || 0
-      })
+      const response = await api.get('/transactions/stats')
+      
+      // Handle different response formats
+      let income = 0;
+      let expense = 0;
+      let balance = 0;
+      
+      if (response.data.income !== undefined && response.data.expense !== undefined) {
+        income = response.data.income || 0;
+        expense = response.data.expense || 0;
+        balance = response.data.balance || income - expense;
+      } else if (response.data.data) {
+        income = response.data.data.income || 0;
+        expense = response.data.data.expense || 0;
+        balance = response.data.data.balance || income - expense;
+      } else {
+        // If stats API doesn't work, calculate from transactions
+        calculateStats(transactions);
+        return;
+      }
+      
+      console.log('Fetched stats:', { income, expense, balance });
+      setStats({ income, expense, balance });
     } catch (error) {
       console.error('Error fetching stats:', error)
+      // Calculate stats from transactions if API fails
+      calculateStats(transactions);
     }
-  }
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    }).format(amount)
   }
 
   const handleFilterChange = (filterName, value) => {
@@ -90,12 +129,12 @@ const Home = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-600">Total Income</h3>
-          <p className="text-3xl font-bold text-green-600">{formatCurrency(stats.income)}</p>
+          <p className="text-3xl font-bold text-green-600">₹{stats.income.toFixed(2)}</p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-600">Total Expenses</h3>
-          <p className="text-3xl font-bold text-red-600">{formatCurrency(stats.expense)}</p>
+          <p className="text-3xl font-bold text-red-600">₹{stats.expense.toFixed(2)}</p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -103,7 +142,7 @@ const Home = () => {
           <p className={`text-3xl font-bold ${
             stats.balance >= 0 ? 'text-green-600' : 'text-red-600'
           }`}>
-            {formatCurrency(stats.balance)}
+            ₹{stats.balance.toFixed(2)}
           </p>
         </div>
       </div>

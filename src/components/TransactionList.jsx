@@ -15,15 +15,15 @@ const TransactionList = ({ transactions, filters, onFilterChange, onRefresh }) =
     }
     
     if (filters.category) {
-      filtered = filtered.filter(t => t.category.toLowerCase().includes(filters.category.toLowerCase()))
+      filtered = filtered.filter(t => t.category && t.category.toLowerCase().includes(filters.category.toLowerCase()))
     }
     
     if (filters.startDate) {
-      filtered = filtered.filter(t => new Date(t.date) >= new Date(filters.startDate))
+      filtered = filtered.filter(t => t.date && new Date(t.date) >= new Date(filters.startDate))
     }
     
     if (filters.endDate) {
-      filtered = filtered.filter(t => new Date(t.date) <= new Date(filters.endDate))
+      filtered = filtered.filter(t => t.date && new Date(t.date) <= new Date(filters.endDate))
     }
     
     setFilteredTransactions(filtered)
@@ -39,6 +39,7 @@ const TransactionList = ({ transactions, filters, onFilterChange, onRefresh }) =
   }
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'No date';
     return new Date(dateString).toLocaleDateString('en-IN')
   }
 
@@ -149,7 +150,7 @@ const TransactionList = ({ transactions, filters, onFilterChange, onRefresh }) =
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.category}
+                  {transaction.category || 'Uncategorized'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(transaction.date)}
@@ -175,7 +176,7 @@ const TransactionList = ({ transactions, filters, onFilterChange, onRefresh }) =
         
         {filteredTransactions.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            No transactions found. {transactions.length === 0 ? 'Add your first transaction!' : 'Try changing your filters.'}
+            {transactions.length === 0 ? 'No transactions found. Add your first transaction!' : 'No transactions match your filters.'}
           </div>
         )}
       </div>

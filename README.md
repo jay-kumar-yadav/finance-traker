@@ -192,3 +192,4 @@ axios: HTTP client
 chart.js & react-chartjs-2: Data visualization
 
 tailwindcss: CSS framework
+Authentication is aslo done now user can login and register
