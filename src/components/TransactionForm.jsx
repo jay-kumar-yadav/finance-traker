@@ -37,7 +37,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md" autoComplete="off">
       <h2 className="text-2xl font-bold mb-6">
         {transaction ? 'Edit Transaction' : 'Add New Transaction'}
       </h2>
@@ -54,6 +54,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel }) => {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            autoComplete="off"
           />
         </div>
 
@@ -69,6 +70,8 @@ const TransactionForm = ({ transaction, onSubmit, onCancel }) => {
             step="0.01"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            autoComplete="off"
+            inputMode="decimal"
           />
         </div>
 
@@ -81,6 +84,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel }) => {
             value={formData.type}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoComplete="off"
           >
             <option value="income">Income</option>
             <option value="expense">Expense</option>
@@ -98,7 +102,21 @@ const TransactionForm = ({ transaction, onSubmit, onCancel }) => {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            autoComplete="off"
+            list="category-suggestions"
           />
+          {/* Optional: If you want to provide your own suggestions later */}
+          <datalist id="category-suggestions">
+            <option value="Food" />
+            <option value="Transport" />
+            <option value="Entertainment" />
+            <option value="Shopping" />
+            <option value="Utilities" />
+            <option value="Rent" />
+            <option value="Salary" />
+            <option value="Freelance" />
+            <option value="Investment" />
+          </datalist>
         </div>
 
         <div>
@@ -112,6 +130,7 @@ const TransactionForm = ({ transaction, onSubmit, onCancel }) => {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            autoComplete="off"
           />
         </div>
       </div>
