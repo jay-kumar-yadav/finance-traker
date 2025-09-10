@@ -1,14 +1,17 @@
 import axios from 'axios';
 
-// Check if backend is running on different port
-// const API_BASE_URL = 'http://localhost:5000/api';
+// Use different URLs based on environment
+const API_BASE_URL = import.meta.env.MODE === 'development'
+  ? 'http://localhost:5000/api' // Local backend during development
+  : 'https://finance-traker-backend-hqfz.onrender.com/api'; // Deployed backend in production
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
@@ -23,13 +26,11 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
     if (error.code === 'ECONNREFUSED') {
-      console.error('Backend server is not running. Please start the backend server on port 5000.');
-      alert('Backend server is not running. Please start the backend server on port 5000.');
+      console.error('Backend server is not running.');
+      alert('Backend server is not running. Please start the backend.');
     }
     return Promise.reject(error);
   }
