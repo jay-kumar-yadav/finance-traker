@@ -10,6 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Add token to requests
@@ -19,17 +20,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-
-// Request interceptor
-api.interceptors.request.use(
-  (config) => {
     console.log(`Making ${config.method?.toUpperCase()} request to: ${config.url}`);
     return config;
   },
@@ -41,12 +31,25 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`Response received: ${response.status}`);
+    return response;
+  },
   (error) => {
+    console.error('Response error:', error.response?.status, error.message);
+    
     if (error.code === 'ECONNREFUSED') {
       console.error('Backend server is not running.');
-      alert('Backend server is not running. Please start the backend.');
+      alert('Backend server is not running. Please check if the backend is deployed and running.');
+    } else if (error.response?.status === 401) {
+      // Unauthorized - clear token and redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    } else if (error.response?.status === 500) {
+      console.error('Server error:', error.response.data);
     }
+    
     return Promise.reject(error);
   }
 );
