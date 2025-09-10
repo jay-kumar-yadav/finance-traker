@@ -3,7 +3,7 @@ import axios from 'axios';
 // Use different URLs based on environment
 const API_BASE_URL = import.meta.env.MODE === 'development'
   ? 'http://localhost:5000/api' // Local backend during development
-  : 'https://finance-traker-backend-hqfz.onrender.com/api'; // Deployed backend in production
+  : 'https://finance-traker-backend-1-lsu8.onrender.com/api'; // Deployed backend in production
 
 const api = axios.create({
   baseURL: API_BASE_URL,
