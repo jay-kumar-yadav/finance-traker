@@ -35,7 +35,7 @@ const Navbar = () => {
               <>
                 <span className="text-sm">Hello, {user.name}</span>
                 <Link to="/" className="hover:underline px-3 py-2 rounded hover:bg-blue-700 transition">Home</Link>
-                <Link to="/add" className="hover:underline px-3 py-2 rounded hover:bg-blue-700 transition">Add</Link>
+                <Link to="/add" className="hover:underline px-3 py-2 rounded hover:bg-blue-700 transition">Add Transaction</Link>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 bg-blue-800 rounded-lg hover:bg-blue-900 transition font-medium"
